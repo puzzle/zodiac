@@ -1,18 +1,23 @@
+# frozen_string_literal: true
+
 module Zodiac
+  # false
   module Finder
     YEAR = 2012
-    
+
     class << self
       def date_for(month, day)
         DateTime.new(YEAR, month, day)
       end
-      
+
       def range_for(month_start, day_start, month_end, day_end)
-        start, ending = date_for(month_start, day_start), date_for(month_end, day_end)
+        start = date_for(month_start, day_start)
+        ending = date_for(month_end, day_end)
         SimpleRange.new(start, ending)
       end
     end
-    
+
+    # Source: WIKIPEDIA
     RANGES = {
       range_for(1,  1,  1,  20) => :capricorn,
       range_for(1,  21, 2,  19) => :aquarius,

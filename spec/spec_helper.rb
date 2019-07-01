@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative './support/active_record'
 
 require 'zodiac'
