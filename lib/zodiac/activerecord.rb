@@ -30,33 +30,35 @@ module Zodiac
     module ClassMethods
       attr_reader :date_for_zodiac, :zodiac_sign_id_field
 
-      def zodiac_reader(dob_attribute, options = { sign_id_attribute: :zodiac_sign_id })
+      def zodiac_reader(dob_attribute, options = nil)
+        options ||= { sign_id_attribute: :zodiac_sign_id }
         @date_for_zodiac = dob_attribute
         @zodiac_sign_id_field = options[:sign_id_attribute]
 
-        # if the migration was applied, we should update the sign attribute before each save
-        # and define some scopes
-        if column_names.include?(@zodiac_sign_id_field.to_s)
-          before_save do |object|
-            object.send(:update_sign_id)
-          end
+        # if the migration was applied, we should update the sign attribute
+        # before each save and define some scopes
+        return unless table_exists?
+        return unless column_names.include?(@zodiac_sign_id_field.to_s)
 
-          # Person.by_zodiac(7 || :libra) == Person.where(zodiac_sign_id: 7)
-          scope :by_zodiac, lambda { |sign|
-            case sign
-            when Symbol
-              where(zodiac_sign_id_field => Zodiac::Finder::SIGN_IDS[sign])
-            when Fixnum
-              where(zodiac_sign_id_field => sign)
-            else
-              raise ArgumentError, "Invalid attribute type #{sign.class} for #{self}.by_zodiac"
-            end
-          }
+        before_save do |object|
+          object.send(:update_sign_id)
+        end
 
-          # Person.gemini == Person.by_zodiac(3)
-          Zodiac.each_sign do |symbol, integer|
-            scope symbol, -> { by_zodiac(integer) }
+        # Person.by_zodiac(7 || :libra) == Person.where(zodiac_sign_id: 7)
+        scope :by_zodiac, lambda { |sign|
+          case sign
+          when Symbol
+            where(zodiac_sign_id_field => Zodiac::Finder::SIGN_IDS[sign])
+          when Fixnum
+            where(zodiac_sign_id_field => sign)
+          else
+            raise ArgumentError, "Invalid attribute type #{sign.class} for #{self}.by_zodiac"
           end
+        }
+
+        # Person.gemini == Person.by_zodiac(3)
+        Zodiac.each_sign do |symbol, integer|
+          scope symbol, -> { by_zodiac(integer) }
         end
       end
     end
