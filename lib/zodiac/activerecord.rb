@@ -3,7 +3,7 @@
 module Zodiac
   module ActiveRecord
     module InstanceMethods
-      def zodiac_sign
+      def zodiac
         raise 'You should call #zodiac_reader in your class for this to work' unless self.class.respond_to?(:date_for_zodiac)
 
         send(self.class.date_for_zodiac).try(:zodiac_sign)
